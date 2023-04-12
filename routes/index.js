@@ -27,7 +27,8 @@ router.post("/push", checkToken, async (req, res, next) => {
 
     // change file name
     let newName = __dirname + "/../public/files/" + page_id;
-    await req.files.file.mv(newName);
+    if (req.files && req.files.file)
+      await req.files.file.mv(newName);
 
     res.redirect("/show/" + page_id);
 });
