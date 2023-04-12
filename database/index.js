@@ -43,7 +43,6 @@ const hashPassword = (password) => {
 }
 
 const comparePassword = (username, password) => {
-    console.log(username, password);
     return new Promise((resolve, reject) => {
         db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
             if (err) {
@@ -62,4 +61,87 @@ const comparePassword = (username, password) => {
     });
 }
 
-module.exports = {getUserById, checkUser, hashPassword, createUser, comparePassword};
+const addPage = (title, body, user_id) => {
+    return new Promise((resolve, reject) => {
+        db.run('INSERT INTO pages (title, body, user_id) VALUES (?, ?, ?) returning id', [title, body, user_id], (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+}
+
+const getPage = (id) => {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM pages WHERE id = ?', [id], (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+}
+
+const searchPage = (str) => {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM pages WHERE title LIKE ? OR body LIKE ?', ['%' + str + '%', '%' + str + '%'], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows);
+            }
+        });
+    });
+}
+
+const addComment = (content, user_id, page_id) => {
+    return new Promise((resolve, reject) => {
+        db.run('INSERT INTO comments (content, user_id, page_id) VALUES (?, ?, ?)', [content, user_id, page_id], (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
+const getComments = (page_id) => {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM comments WHERE page_id = ?', [page_id], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows);
+            }
+        });
+    });
+}
+
+const getAllPages = () => {
+    return new Promise((resolve, reject) => {
+        db.all('SELECT p.*, u.username FROM pages p JOIN users u ON p.user_id = u.id', (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows);
+            }
+        });
+    });
+}
+module.exports = {
+    getUserById,
+    checkUser,
+    hashPassword,
+    createUser,
+    comparePassword,
+    addPage,
+    getPage,
+    searchPage,
+    addComment,
+    getComments,
+    getAllPages
+};
