@@ -1,6 +1,6 @@
 var express = require('express');
-const {checkToken} = require("../middleware");
-const {addPage, getPage, getComments, addComment, getAllPages} = require("../database");
+const {checkToken, checkNotLogin} = require("../middleware");
+const {addPage, getPage, getComments, addComment, getAllPages, searchPage} = require("../database");
 var router = express.Router();
 
 /* GET home page. */
@@ -9,11 +9,12 @@ router.get('/', async (req, res, next) => {
     res.render('home', {title: 'Web App', pages: pages});
 });
 
-router.get('/login', (req, res, next) => {
+router.get('/login', checkNotLogin, (req, res, next) => {
+
     res.render('login', {title: 'Express'});
 });
 
-router.get('/register', (req, res, next) => {
+router.get('/register', checkNotLogin, (req, res, next) => {
     res.render('register', {title: 'Express'});
 });
 
@@ -22,8 +23,7 @@ router.get("/push", checkToken, (req, res, next) => {
 });
 
 router.post("/push", checkToken, async (req, res, next) => {
-    let name = req.files.file.name;
-    let page_id = await addPage(req.body.tenphim, req.body.noidung, req.user_id);
+    let page_id = await addPage(req.body.tenphim, req.body.noidung, req.user.id);
 
     // change file name
     let newName = __dirname + "/../public/files/" + page_id;
@@ -34,20 +34,23 @@ router.post("/push", checkToken, async (req, res, next) => {
 
 router.get("/show/:id", async (req, res, next) => {
     let page = await getPage(req.params.id);
+    if(page === undefined)
+        res.redirect("/");
     let comments = await getComments(req.params.id);
     res.render('show', {title: page.title, page: page, comments: comments});
 });
 
-router.post("/comment", async (req, res, next) => {
+router.post("/comment", checkToken, async (req, res, next) => {
     let page_id = req.body.page_id;
     let comment = req.body.comment;
-    let user_id = req.body.user_id;
-    await addComment(comment, page_id, user_id);
+    let user_id = req.user.id;
+    await addComment(comment, user_id, page_id);
     res.redirect("/show/" + page_id);
 });
 
-router.get("/search", async (req, res, next) => {
-    let pages = await getPage(req.query.search);
+router.post("/search", async (req, res, next) => {
+    let pages = await searchPage(req.body.input);
+    console.log(pages);
     res.json(pages);
 });
 module.exports = router;

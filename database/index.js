@@ -63,11 +63,11 @@ const comparePassword = (username, password) => {
 
 const addPage = (title, body, user_id) => {
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO pages (title, body, user_id) VALUES (?, ?, ?) returning id', [title, body, user_id], (err, row) => {
+        db.all('INSERT INTO pages (title, body, user_id) VALUES (?, ?, ?) returning id', [title, body, user_id], (err, row) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(row);
+                resolve(row[0].id);
             }
         });
     });
@@ -75,7 +75,7 @@ const addPage = (title, body, user_id) => {
 
 const getPage = (id) => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM pages WHERE id = ?', [id], (err, row) => {
+        db.get('SELECT p.*,u.username FROM pages p JOIN users u ON p.user_id = u.id WHERE p.id = ?', [id], (err, row) => {
             if (err) {
                 reject(err);
             } else {
@@ -111,7 +111,7 @@ const addComment = (content, user_id, page_id) => {
 
 const getComments = (page_id) => {
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM comments WHERE page_id = ?', [page_id], (err, rows) => {
+        db.all('SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id WHERE c.page_id = ?', [page_id], (err, rows) => {
             if (err) {
                 reject(err);
             } else {

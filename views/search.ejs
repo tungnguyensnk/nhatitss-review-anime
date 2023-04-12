@@ -1,15 +1,41 @@
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css" />
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css"/>
 <div class="row-fluid">
-    <select class="selectpicker" data-show-subtext="true" data-live-search="true">
-        <option data-subtext="Rep California">Tom Foolery</option>
-        <option data-subtext="Sen California">Bill Gordon</option>
-        <option data-subtext="Sen Massacusetts">Elizabeth Warren</option>
-        <option data-subtext="Rep Alabama">Mario Flores</option>
-        <option data-subtext="Rep Alaska">Don Young</option>
-        <option data-subtext="Rep California" disabled="disabled">Marvin Martinez</option>
-    </select>
+    <div id="search_area">
+        <input type="text" name="search" id="search" class="form-control input" autocomplete="off"
+               placeholder="Search"/>
+    </div>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
+<script>
+    let list = [];
+    $(document).ready(function () {
+        $('#search').typeahead({
+            source: function (query, result) {
+                $.ajax({
+                    url: "search",
+                    method: "POST",
+                    data: {
+                        input: query
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        list = data;
+                        result($.map(data, function (item) {
+                            return item.title;
+                        }));
+                    }
+                })
+            }
+        });
+
+        $(document).on('click', '.dropdown-menu li a', function () {
+            window.location.href = "/show/" + list.filter(item => item.title === $(this).text())[0].id;
+        });
+    });
+
+</script>
