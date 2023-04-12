@@ -61,4 +61,5 @@ const comparePassword = (username, password) => {
         });
     });
 }
+
 module.exports = {getUserById, checkUser, hashPassword, createUser, comparePassword};

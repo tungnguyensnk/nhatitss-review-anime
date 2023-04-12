@@ -8,7 +8,7 @@ router.post('/login', async function (req, res) {
     let password = req.body.password;
     let user = await db.comparePassword(username, password);
     if (user) {
-        res.json({status: 'success', message: 'Login successful'});
+        res.json({status: 'success', message: 'Login successful', username: username, password: password});
     } else {
         res.json({status: 'error', message: 'Login failed'});
     }

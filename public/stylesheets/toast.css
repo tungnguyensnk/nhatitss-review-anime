@@ -1,5 +1,5 @@
 .toast {
-    display: flex;
+    display: flex !important;
     align-items: center;
     background-color: #fff;
     border-radius: 5px;
